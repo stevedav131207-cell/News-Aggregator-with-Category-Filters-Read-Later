@@ -6,3 +6,8 @@
 - Worked upon PRD and update it.
 - Then created an empty repo for the project.
 
+# DAY-2 ----
+
+- Updated the PRD and taken the approval from the mentor.
+- Read about Django , installed it and done some basic operation in it.
+- Learn about FastAPI , installed it and learn about it's feature , it's functionality .
