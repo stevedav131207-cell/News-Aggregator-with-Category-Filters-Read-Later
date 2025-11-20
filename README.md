@@ -1,6 +1,6 @@
 # News-Aggregator-with-Category-Filters-Read-Later
 
-# DAY 1 ----
+# DAY-1 ----
 
 - Researched about our project and find out what we have to study and how we will implement our idea.
 - Worked upon PRD and update it.
@@ -18,3 +18,9 @@
 - Started learning FastAPI ..
 - Studied DOM and API Calling with using Postman.
 - Studied about Django and file manipulation.
+
+# DAY-4 ----
+
+- Studied more about Django.
+- Completed DOM.
+- Tried to create a demo interface of the website.
