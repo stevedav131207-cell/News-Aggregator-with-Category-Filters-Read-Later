@@ -106,7 +106,7 @@ A modern, full-featured news aggregator web application that fetches news from m
 - Database access
 - **Admin Credentials:**
   - Username: `admin`
-  - Password: `admin123`
+  - Password: `********`
   - Access: http://127.0.0.1:8000/admin/
 
 ---
@@ -142,7 +142,7 @@ A modern, full-featured news aggregator web application that fetches news from m
    ```
    Or use existing admin:
    - Username: `admin`
-   - Password: `admin123`
+   - Password: `********`
 
 5. **Start server:**
    ```bash
@@ -466,7 +466,7 @@ See `.kiro/specs/` for complete specifications.
 ### Admin Panel
 - **URL:** http://127.0.0.1:8000/admin/
 - **Username:** `admin`
-- **Password:** `admin123`
+- **Password:** `********`
 
 ### Admin Features
 - User management (view, create, edit, delete)
