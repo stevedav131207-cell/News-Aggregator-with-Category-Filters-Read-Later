@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Bookmark - SAMACHAR{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title mb-4">Edit Bookmark</h2>
+                    
+                    <div class="mb-4">
+                        <h5>{{ bookmark.title }}</h5>
+                        <p class="text-muted">{{ bookmark.source }} - {{ bookmark.published_at|date:"M d, Y" }}</p>
+                    </div>
+                    
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="note" class="form-label">Personal Note</label>
+                            <textarea class="form-control" id="note" name="note" rows="4" 
+                                      placeholder="Add your thoughts or notes about this article...">{{ bookmark.note }}</textarea>
+                            <div class="form-text">Add personal notes or tags to help you remember why you saved this article.</div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'bookmark_list' %}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
