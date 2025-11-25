@@ -5,7 +5,7 @@
 ### Admin Login Details
 
 **Username:** `admin`  
-**Password:** `admin123`  
+**Password:** `********`  
 **Email:** `admin@samachar.com`
 
 ---
@@ -25,7 +25,7 @@ http://127.0.0.1:8000/admin/
 
 ### 3. Login
 - Enter username: `admin`
-- Enter password: `admin123`
+- Enter password: `********`
 - Click "Log in"
 
 ---
@@ -58,7 +58,7 @@ http://127.0.0.1:8000/admin/
 ## 🔒 Security Notes
 
 ### For Development
-- Current password (`admin123`) is fine for local development
+- Current password (`********`) is fine for local development
 - Keep this file secure and don't commit to public repositories
 
 ### For Production
@@ -164,7 +164,7 @@ python3 manage.py shell -c "from django.contrib.auth.models import User; u = Use
 
 ### Can't Login?
 - Check username is `admin` (lowercase)
-- Check password is `admin123`
+- Check password is `********`
 - Ensure server is running
 - Clear browser cache
 
