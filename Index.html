@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Stay informed with the latest news headlines across multiple categories including Sports, Technology, Business, Entertainment, Health, and Science.">
+  <meta name="keywords" content="news, headlines, sports, technology, business, entertainment, health, science">
+  <title>SAMACHAR - Latest Headlines</title>
+  <link rel="stylesheet" href="CSS/STYLE.css">
+</head>
+<body>
+  <!-- Skip Links for Accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <a href="#category-filters" class="skip-link">Skip to categories</a>
+  <a href="#search" class="skip-link">Skip to search</a>
+
+  <!-- Header -->
+  <header role="banner" class="header">
+    <div class="container">
+      <h1 class="site-title">SAMACHAR</h1>
+      <p class="site-tagline">Source for the latest headlines</p>
+    </div>
+  </header>
+
+  <!-- Navigation -->
+  <nav role="navigation" class="nav" aria-label="Main navigation">
+    <div class="container">
+      <!-- Category Filters -->
+      <div id="category-filters" class="category-filters" role="group" aria-label="News categories">
+        <!-- Categories will be rendered here by ui.js -->
+      </div>
+
+      <!-- Search -->
+      <div class="search-container">
+        <label for="search" class="visually-hidden">Search articles</label>
+        <input 
+          type="search" 
+          id="search" 
+          class="search-input" 
+          placeholder="Search news..."
+          aria-label="Search articles"
+          autocomplete="off"
+        >
+      </div>
+
+      <!-- Sort Controls -->
+      <div id="sort-controls" class="sort-controls" role="group" aria-label="Sort options">
+        <!-- Sort controls will be rendered here by ui.js -->
+      </div>
+
+      <!-- Bookmarks Link -->
+      <button id="view-bookmarks" class="btn btn-secondary" aria-label="View bookmarked articles">
+        <span aria-hidden="true">📚</span> Bookmarks
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main id="main-content" role="main" class="main">
+    <div class="container">
+      <!-- Loading Indicator -->
+      <div id="loading" class="loading" role="status" aria-live="polite" aria-hidden="true">
+        <div class="spinner" aria-hidden="true"></div>
+        <p>Loading articles...</p>
+      </div>
+
+      <!-- Error Container -->
+      <div id="error" class="error" role="alert" aria-live="assertive" aria-hidden="true">
+        <!-- Error messages will be displayed here -->
+      </div>
+
+      <!-- Articles Container -->
+      <div id="articles" class="articles-grid" role="region" aria-label="News articles">
+        <!-- Articles will be rendered here by ui.js -->
+      </div>
+
+      <!-- Pagination -->
+      <nav id="pagination" class="pagination" role="navigation" aria-label="Pagination">
+        <!-- Pagination controls will be rendered here by ui.js -->
+      </nav>
+    </div>
+  </main>
+
+  <!-- Undo Notification -->
+  <div id="undo-notification" class="undo-notification" role="status" aria-live="polite" aria-hidden="true">
+    <!-- Undo notifications will be displayed here -->
+  </div>
+
+  <!-- Footer -->
+  <footer role="contentinfo" class="footer">
+    <div class="container">
+      <p>&copy; SAMACHAR 2025 . Powered by News API.</p>
+    </div>
+  </footer>
+
+</body>
+</html>
