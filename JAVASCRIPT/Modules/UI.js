@@ -187,3 +187,184 @@ export function renderCategoryFilters(categories, activeCategory, container) {
   container.appendChild(fragment);
 }
 
+/**
+ * Render sort controls
+ * @param {string} currentSort - Current sort option
+ * @param {HTMLElement} container - Container element
+ */
+export function renderSortControls(currentSort, container) {
+  if (!container) return;
+
+  const sortOptions = [
+    { value: 'publishedAt', label: 'Latest' },
+    { value: 'relevance', label: 'Relevance' }
+  ];
+
+  container.innerHTML = `
+    <span class="sort-label">Sort by:</span>
+  `;
+
+  const fragment = document.createDocumentFragment();
+
+  sortOptions.forEach(option => {
+    const button = document.createElement('button');
+    button.className = `sort-btn ${option.value === currentSort ? 'active' : ''}`;
+    button.setAttribute('data-sort', option.value);
+    button.setAttribute('aria-pressed', option.value === currentSort);
+    button.textContent = option.label;
+
+    fragment.appendChild(button);
+  });
+
+  container.appendChild(fragment);
+}
+
+/**
+ * Render bookmarks view
+ * @param {Array} bookmarks - Array of bookmark objects
+ * @param {HTMLElement} container - Container element
+ */
+export function renderBookmarks(bookmarks, container) {
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  if (!bookmarks || bookmarks.length === 0) {
+    container.innerHTML = `
+      <div class="no-results" style="grid-column: 1 / -1; text-align: center; padding: var(--spacing-2xl); color: var(--color-text-secondary);">
+        <p style="font-size: var(--font-size-lg); margin-bottom: var(--spacing-md);">No bookmarks yet</p>
+        <p>Bookmark articles to read them later</p>
+      </div>
+    `;
+    return;
+  }
+
+  const fragment = document.createDocumentFragment();
+
+  bookmarks.forEach(bookmark => {
+    const card = createArticleCard(bookmark.article, true);
+    fragment.appendChild(card);
+  });
+
+  container.appendChild(fragment);
+}
+
+/**
+ * Show error message
+ * @param {string} message - Error message
+ * @param {HTMLElement} container - Error container element
+ */
+export function showError(message, container) {
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="error-message">
+      <p>${message}</p>
+    </div>
+  `;
+  container.setAttribute('aria-hidden', 'false');
+  container.style.display = 'block';
+}
+
+/**
+ * Hide error message
+ * @param {HTMLElement} container - Error container element
+ */
+export function hideError(container) {
+  if (!container) return;
+
+  container.innerHTML = '';
+  container.setAttribute('aria-hidden', 'true');
+  container.style.display = 'none';
+}
+
+/**
+ * Show loading indicator
+ * @param {HTMLElement} container - Loading container element
+ */
+export function showLoading(container) {
+  if (!container) return;
+
+  container.setAttribute('aria-hidden', 'false');
+  container.style.display = 'block';
+}
+
+/**
+ * Hide loading indicator
+ * @param {HTMLElement} container - Loading container element
+ */
+export function hideLoading(container) {
+  if (!container) return;
+
+  container.setAttribute('aria-hidden', 'true');
+  container.style.display = 'none';
+}
+
+/**
+ * Update bookmark button state
+ * @param {string} articleId - Article ID
+ * @param {boolean} isBookmarked - Whether article is bookmarked
+ */
+export function updateBookmarkButton(articleId, isBookmarked) {
+  const button = document.querySelector(`.bookmark-btn[data-article-id="${articleId}"]`);
+  
+  if (!button) return;
+
+  if (isBookmarked) {
+    button.classList.add('bookmarked');
+    button.setAttribute('aria-pressed', 'true');
+    button.setAttribute('aria-label', 'Remove bookmark');
+    button.textContent = '★';
+  } else {
+    button.classList.remove('bookmarked');
+    button.setAttribute('aria-pressed', 'false');
+    button.setAttribute('aria-label', 'Bookmark article');
+    button.textContent = '☆';
+  }
+}
+
+/**
+ * Show undo notification
+ * @param {string} message - Notification message
+ * @param {Function} onUndo - Callback for undo action
+ */
+export function showUndoNotification(message, onUndo) {
+  const container = document.getElementById('undo-notification');
+  if (!container) return;
+
+  container.innerHTML = `
+    <span>${message}</span>
+    <button class="undo-btn" id="undo-action">Undo</button>
+  `;
+
+  container.setAttribute('aria-hidden', 'false');
+  container.style.display = 'flex';
+
+  // Set up undo button
+  const undoBtn = document.getElementById('undo-action');
+  if (undoBtn) {
+    undoBtn.addEventListener('click', () => {
+      onUndo();
+      hideUndoNotification();
+    });
+  }
+
+  // Auto-hide after 5 seconds
+  setTimeout(() => {
+    hideUndoNotification();
+  }, 5000);
+}
+
+/**
+ * Hide undo notification
+ */
+export function hideUndoNotification() {
+  const container = document.getElementById('undo-notification');
+  if (!container) return;
+
+  container.innerHTML = '';
+  container.setAttribute('aria-hidden', 'true');
+  container.style.display = 'none';
+}
+
+
