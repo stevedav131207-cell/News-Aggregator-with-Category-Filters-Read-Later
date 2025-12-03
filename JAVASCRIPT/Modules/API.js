@@ -1,4 +1,4 @@
-// api.js - News API communication
+// API.js - News API communication
 
 const API_KEY = import.meta.env.VITE_NEWS_API_KEY;
 const API_BASE_URL = 'https://newsapi.org/v2';
