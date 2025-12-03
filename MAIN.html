@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Samachar - Latest News Headlines</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+
+    /* Visually hidden but accessible to screen readers */
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    /* Focus visible for better accessibility */
+    *:focus-visible {
+      outline: 3px solid #dc2626;
+      outline-offset: 2px;
+    }
+
+    /* Reduced motion for accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    /* Skip to main content link */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: #dc2626;
+      color: white;
+      padding: 8px;
+      text-decoration: none;
+      z-index: 1000;
+    }
+
+    .skip-link:focus {
+      top: 0;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+      padding: 1rem 0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .header-bottom {
+      display: none;
+      margin-top: 0.75rem;
+    }
+
+    .site-title {
+      color: white;
+      font-size: 2rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s, opacity 0.2s;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .site-title:hover {
+      transform: scale(1.05);
+    }
+
+    .site-title:focus {
+      outline: 3px solid rgba(255,255,255,0.5);
+      outline-offset: 4px;
+      border-radius: 4px;
+    }
+
+    .site-title:active {
+      transform: scale(0.98);
+    }
+
+    .search-container {
+      max-width: 400px;
+      flex: 1;
+    }
+
+    .search-desktop {
+      display: block;
+    }
+
+    .search-mobile {
+      display: none;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: none;
+      border-radius: 25px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: box-shadow 0.3s, transform 0.2s;
+    }
+
+    .search-input:focus {
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.3);
+      transform: scale(1.02);
+    }
+
+    .search-input:focus-visible {
+      outline: 3px solid rgba(255,255,255,0.5);
+      outline-offset: 2px;
+    }
+
+    .btn-bookmarks {
+      background: white;
+      color: #dc2626;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 25px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-bookmarks:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .btn-bookmarks:focus {
+      outline: 3px solid rgba(255,255,255,0.5);
+      outline-offset: 2px;
+    }
+
+    .btn-bookmarks:active {
+      transform: translateY(0);
+    }
+
+    /* Category Navigation */
+    .category-nav {
+      background: white;
+      border-bottom: 2px solid #e5e5e5;
+      position: sticky;
+      top: 72px;
+      z-index: 99;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .category-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 1rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .category-container::-webkit-scrollbar {
+      display: none;
+    }
+
+    .category-filters {
+      display: flex;
+      gap: 0.5rem;
+      padding: 1rem 0;
+      white-space: nowrap;
+    }
+
+    .category-btn {
+      padding: 0.75rem 1.5rem;
+      background: #f5f5f5;
+      border: 2px solid transparent;
+      border-radius: 25px;
+      color: #333;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      white-space: nowrap;
+      position: relative;
+    }
+
+    .category-btn:hover {
+      background: #ffe5e5;
+      border-color: #dc2626;
+      color: #dc2626;
+      transform: translateY(-2px);
+    }
+
+    .category-btn:focus {
+      outline: 3px solid #dc2626;
+      outline-offset: 2px;
+    }
+
+    .category-btn:active {
+      transform: translateY(0);
+    }
+
+    .category-btn.active {
+      background: #dc2626;
+      color: white;
+      border-color: #dc2626;
+    }
+
+    /* Main Content */
+    .main {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    .loading, .error {
+      text-align: center;
+      padding: 3rem 1rem;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid #f5f5f5;
+      border-top-color: #dc2626;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .articles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .article-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+      display: flex;
+      flex-direction: column;
+      animation: fadeInUp 0.5s ease-out;
+    }
+
+    .article-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+    .article-card:focus-within {
+      outline: 3px solid #dc2626;
+      outline-offset: 2px;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .article-image {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      background: #f5f5f5;
+    }
+
+    .article-content {
+      padding: 1rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .article-meta {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    .article-source {
+      color: #dc2626;
+      font-weight: 600;
+    }
+
+    .article-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #333;
+      line-height: 1.3;
+    }
+
+    .article-description {
+      color: #666;
+      margin-bottom: 0.75rem;
+      flex: 1;
+      line-height: 1.5;
+      font-size: 0.9rem;
+    }
+
+    .article-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .article-link {
+      flex: 1;
+      padding: 0.75rem;
+      background: #dc2626;
+      color: white;
+      text-decoration: none;
+      text-align: center;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    .article-link:hover {
+      background: #b91c1c;
+      transform: scale(1.02);
+    }
+
+    .article-link:focus {
+      outline: 3px solid #dc2626;
+      outline-offset: 2px;
+    }
+
+    .article-link:active {
+      transform: scale(0.98);
+    }
+
+    .bookmark-btn {
+      padding: 0.75rem 1rem;
+      background: #f5f5f5;
+      border: 2px solid #e5e5e5;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.25rem;
+      transition: all 0.3s;
+      position: relative;
+    }
+
+    .bookmark-btn:hover {
+      background: #ffe5e5;
+      border-color: #dc2626;
+      transform: scale(1.1);
+    }
+
+    .bookmark-btn:focus {
+      outline: 3px solid #dc2626;
+      outline-offset: 2px;
+    }
+
+    .bookmark-btn:active {
+      transform: scale(0.95);
+    }
+
+    .bookmark-btn.bookmarked {
+      background: #fef3c7;
+      border-color: #f59e0b;
+      color: #f59e0b;
+      animation: bookmarkPulse 0.5s ease-out;
+    }
+
+    @keyframes bookmarkPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .pagination-btn {
+      padding: 0.75rem 1.5rem;
+      background: #dc2626;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .pagination-btn:hover:not(:disabled) {
+      background: #b91c1c;
+      transform: translateY(-2px);
+    }
+
+    .pagination-btn:focus:not(:disabled) {
+      outline: 3px solid #dc2626;
+      outline-offset: 2px;
+    }
+
+    .pagination-btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .pagination-btn:disabled {
+      background: #e5e5e5;
+      color: #999;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .pagination-info {
+      font-weight: 600;
+      color: #666;
+    }
+
+    /* Footer */
+    .footer {
+      background: #333;
+      color: white;
+      text-align: center;
+      padding: 2rem 1rem;
+      margin-top: 3rem;
+    }
+
+    /* Bookmark Management */
+    .bookmark-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding: 1rem;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .bookmark-count {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #dc2626;
+    }
+
+    .bookmark-card {
+      position: relative;
+    }
+
+    .bookmark-card .bookmark-menu {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      display: flex;
+      gap: 0.5rem;
+      z-index: 10;
+    }
+
+    .btn-delete {
+      padding: 0.5rem;
+      background: white;
+      border: 2px solid #e5e5e5;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .btn-delete:hover {
+      background: #fee2e2;
+      border-color: #ef4444;
+      transform: scale(1.1);
+    }
+
+    .btn-delete:focus {
+      outline: 3px solid #ef4444;
+      outline-offset: 2px;
+    }
+
+    .btn-delete:active {
+      transform: scale(0.95);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #333;
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      z-index: 1001;
+      display: none;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .toast.active {
+      display: block;
+      animation: slideIn 0.3s ease-out, fadeOut 0.3s ease-out 2.7s;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeOut {
+      from {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+        transform: translateX(400px);
+      }
+    }
+
+    /* Undo Notification */
+    .undo-notification {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1f2937;
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      z-index: 1002;
+      display: none;
+      align-items: center;
+      gap: 1rem;
+      animation: slideUp 0.3s ease-out;
+    }
+
+    .undo-notification.active {
+      display: flex;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateX(-50%) translateY(100px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .undo-btn {
+      padding: 0.5rem 1rem;
+      background: #dc2626;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+
+    .undo-btn:hover {
+      background: #b91c1c;
+      transform: scale(1.05);
+    }
+
+    .undo-btn:focus {
+      outline: 3px solid rgba(255,255,255,0.5);
+      outline-offset: 2px;
+    }
+
+    .undo-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Desktop - Default */
+    @media (min-width: 1025px) {
+      .search-desktop {
+        display: block;
+      }
+
+      .search-mobile {
+        display: none;
+      }
+
+      .header-bottom {
+        display: none;
+      }
+    }
+
+    /* Responsive - Tablet (481px to 1024px) */
+    @media (min-width: 481px) and (max-width: 1024px) {
+      .header {
+        padding: 0.6rem 0; /* 60% of original 1rem */
+      }
+
+      .header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .search-desktop {
+        display: block;
+        flex: 1;
+        max-width: none;
+        margin: 0 1rem;
+      }
+
+      .search-mobile {
+        display: none;
+      }
+
+      .header-bottom {
+        display: none;
+      }
+
+      .site-title {
+        font-size: 1.5rem;
+      }
+
+      .btn-bookmarks {
+        white-space: nowrap;
+        padding: 0.75rem 1.25rem;
+      }
+
+      .category-nav {
+        top: 60px;
+      }
+
+      .articles-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .bookmark-header {
+        flex-direction: row;
+      }
+    }
+
+    /* Responsive - Mobile (up to 480px) */
+    @media (max-width: 480px) {
+      .header {
+        padding: 0.75rem 0;
+      }
+
+      .header-container {
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* First row: Logo and Bookmarks */
+      .header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+      }
+
+      .search-desktop {
+        display: none; /* Hide desktop search */
+      }
+
+      .search-mobile {
+        display: block; /* Show mobile search */
+      }
+
+      /* Second row: Search bar */
+      .header-bottom {
+        display: block;
+        width: 100%;
+      }
+
+      .header-bottom .search-container {
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .site-title {
+        font-size: 1.3rem;
+      }
+
+      .btn-bookmarks {
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+      }
+
+      .btn-bookmarks span {
+        font-size: 1rem;
+      }
+
+      .search-input {
+        width: 100%;
+        padding: 0.65rem 1rem;
+      }
+
+      .category-nav {
+        top: 120px;
+      }
+
+      .articles-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .bookmark-header {
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Skip to main content for accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
+  <header role="banner" class="header">
+    <div class="header-container">
+      <div class="header-top">
+        <a href="#" class="site-title" id="site-logo" aria-label="Samachar - Go to homepage" tabindex="0">
+          <span aria-hidden="true">📰</span> Samachar
+        </a>
+        <div class="search-container search-desktop">
+          <label for="search" class="visually-hidden">Search news articles</label>
+          <input type="search" id="search" class="search-input" placeholder="Search news..." aria-label="Search news articles" autocomplete="off">
+        </div>
+        <button id="view-bookmarks" class="btn-bookmarks" aria-label="View bookmarked articles" tabindex="0">
+          <span aria-hidden="true">📚</span> <span>Bookmarks</span>
+        </button>
+      </div>
+      <div class="header-bottom">
+        <div class="search-container search-mobile">
+          <label for="search-mobile" class="visually-hidden">Search news articles</label>
+          <input type="search" id="search-mobile" class="search-input" placeholder="Search news..." aria-label="Search news articles" autocomplete="off">
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <nav role="navigation" class="category-nav" aria-label="News categories">
+    <div class="category-container">
+      <div id="category-filters" class="category-filters" role="group" aria-label="Filter news by category"></div>
+    </div>
+  </nav>
+
+  <main id="main-content" role="main" class="main">
+    <div id="loading" class="loading" aria-hidden="true" aria-live="polite" role="status">
+      <div class="spinner" aria-hidden="true"></div>
+      <p>Loading articles...</p>
+    </div>
+    <div id="error" class="error" aria-hidden="true" aria-live="assertive" role="alert"></div>
+    <div id="articles" class="articles-grid" role="region" aria-label="News articles"></div>
+    <nav id="pagination" class="pagination" role="navigation" aria-label="Article pagination"></nav>
+  </main>
+
+  <footer role="contentinfo" class="footer">
+    <p>&copy; 2025 Samachar. Powered by News API.</p>
+  </footer>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Undo Notification -->
+  <div id="undo-notification" class="undo-notification" role="status" aria-live="polite" aria-atomic="true">
+    <span id="undo-message"></span>
+    <button id="undo-btn" class="undo-btn" aria-label="Undo last action">Undo</button>
+  </div>
+
+  <script>
+    const API_KEY = '456550deb53f4bcebfc882cb397bb4c6';
+    const API_BASE_URL = 'https://newsapi.org/v2';
+    
+    let state = {
+      articles: [],
+      currentPage: 1,
+      totalPages: 0,
+      activeCategory: 'general',
+      searchQuery: '',
+      bookmarks: [],
+      currentView: 'articles'
+    };
+    
+    let searchTimeout = null;
+
+    const CATEGORIES = [
+      { value: 'general', label: 'General' },
+      { value: 'business', label: 'Business' },
+      { value: 'technology', label: 'Technology' },
+      { value: 'sports', label: 'Sports' },
+      { value: 'entertainment', label: 'Entertainment' },
+      { value: 'health', label: 'Health' },
+      { value: 'science', label: 'Science' }
+    ];
+
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffTime = Math.abs(now - date);
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      if (diffDays === 0) return 'Today';
+      if (diffDays === 1) return 'Yesterday';
+      if (diffDays < 7) return `${diffDays} days ago`;
+      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
+    function toggleElement(id, show, content = '') {
+      const el = document.getElementById(id);
+      el.style.display = show ? 'block' : 'none';
+      el.setAttribute('aria-hidden', !show);
+      if (content) el.innerHTML = content;
+    }
+
+    const showLoading = () => toggleElement('loading', true);
+    const hideLoading = () => toggleElement('loading', false);
+    const showError = (msg) => toggleElement('error', true, `<p>${msg}</p>`);
+    const hideError = () => toggleElement('error', false, '');
+
+    function renderCategories() {
+      const container = document.getElementById('category-filters');
+      container.innerHTML = CATEGORIES.map(cat => 
+        `<button class="category-btn ${cat.value === state.activeCategory ? 'active' : ''}" 
+                 data-category="${cat.value}"
+                 aria-label="Filter by ${cat.label} news"
+                 aria-pressed="${cat.value === state.activeCategory}"
+                 tabindex="0">${cat.label}</button>`
+      ).join('');
+    }
+ 
+    function generateArticleId(url) {
+      let hash = 0;
+      for (let i = 0; i < url.length; i++) {
+        const char = url.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+      }
+      return Math.abs(hash).toString(36);
+    }
+
+    function isBookmarked(articleUrl) {
+      const id = generateArticleId(articleUrl);
+      return state.bookmarks.some(b => b.id === id);
+    }
+
+    function renderArticles(articles) {
+      const container = document.getElementById('articles');
+      if (!articles || articles.length === 0) {
+        const message = state.currentView === 'bookmarks' 
+          ? '<p style="font-size: 1.125rem; margin-bottom: 1rem;">No bookmarks yet</p><p>Bookmark articles to read them later</p>'
+          : '<p>No articles found</p>';
+        container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 2rem; color: #64748b;" role="status">${message}</div>`;
+        return;
+      }
+      
+      const articlesHTML = articles.map((article, index) => {
+        const bookmarked = isBookmarked(article.url);
+        const articleId = generateArticleId(article.url);
+        const isBookmarkView = state.currentView === 'bookmarks';
+        
+        return `
+        <article class="article-card ${isBookmarkView ? 'bookmark-card' : ''}" data-article-id="${articleId}" style="animation-delay: ${index * 0.05}s">
+          ${isBookmarkView ? `
+            <div class="bookmark-menu">
+              <button class="btn-delete" data-article-id="${articleId}" title="Delete bookmark" aria-label="Delete ${article.title} from bookmarks" tabindex="0">
+                <span aria-hidden="true">🗑️</span>
+              </button>
+            </div>
+          ` : ''}
+          ${article.urlToImage ? 
+            `<img src="${article.urlToImage}" alt="${article.title}" class="article-image" loading="lazy" decoding="async">` :
+            '<div class="article-image" style="background: #fee2e2; display: flex; align-items: center; justify-content: center; color: #dc2626; font-weight: 600; font-size: 1rem;" role="img" aria-label="No image available">No Image</div>'
+          }
+          <div class="article-content">
+            <div class="article-meta">
+              <span class="article-source">${article.source.name}</span>
+              <time class="article-date" datetime="${article.publishedAt}">${formatDate(article.publishedAt)}</time>
+            </div>
+            <h2 class="article-title">${article.title}</h2>
+            <p class="article-description">${article.description || 'No description available'}</p>
+            <div class="article-actions">
+              <a href="${article.url}" target="_blank" rel="noopener noreferrer" class="article-link" aria-label="Read full article: ${article.title}">Read More</a>
+              ${!isBookmarkView ? `
+                <button class="bookmark-btn ${bookmarked ? 'bookmarked' : ''}" data-article-url="${article.url}" data-article-id="${articleId}" aria-label="${bookmarked ? 'Remove bookmark' : 'Add bookmark'}" aria-pressed="${bookmarked}" tabindex="0">
+                  <span aria-hidden="true">${bookmarked ? '★' : '☆'}</span>
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        </article>
+      `}).join('');
+      
+      container.innerHTML = articlesHTML;
+    }
+
+    function renderPagination() {
+      const container = document.getElementById('pagination');
+      if (state.totalPages <= 1) {
+        container.style.display = 'none';
+        container.setAttribute('aria-hidden', 'true');
+        return;
+      }
+      container.style.display = 'flex';
+      container.setAttribute('aria-hidden', 'false');
+      container.innerHTML = `
+        <button class="pagination-btn" id="prev-page" ${state.currentPage === 1 ? 'disabled aria-disabled="true"' : 'aria-disabled="false"'} aria-label="Go to previous page" tabindex="0">
+          <span aria-hidden="true">←</span> Previous
+        </button>
+        <span class="pagination-info" role="status" aria-live="polite" aria-atomic="true">
+          Page ${state.currentPage} of ${state.totalPages}
+        </span>
+        <button class="pagination-btn" id="next-page" ${state.currentPage === state.totalPages ? 'disabled aria-disabled="true"' : 'aria-disabled="false"'} aria-label="Go to next page" tabindex="0">
+          Next <span aria-hidden="true">→</span>
+        </button>
+      `;
+    }
+
+    async function loadArticles() {
+      showLoading();
+      hideError();
+      
+      try {
+        let url;
+        if (state.searchQuery) {
+          url = `${API_BASE_URL}/everything?q=${encodeURIComponent(state.searchQuery)}&page=${state.currentPage}&pageSize=10&sortBy=publishedAt&apiKey=${API_KEY}`;
+        } else {
+          url = `${API_BASE_URL}/top-headlines?category=${state.activeCategory}&page=${state.currentPage}&pageSize=10&apiKey=${API_KEY}`;
+        }
+        
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.status === 'error') {
+          throw new Error(data.message || 'Failed to fetch articles');
+        }
+        
+        state.articles = data.articles || [];
+        state.totalPages = Math.ceil((data.totalResults || 0) / 10);
+        
+        hideLoading();
+        renderArticles(state.articles);
+        renderPagination();
+      } catch (error) {
+        hideLoading();
+        console.error('Error:', error);
+        showError('Failed to load articles. Please try again.');
+      }
+    }
+
+    function loadBookmarks() {
+      try {
+        const stored = localStorage.getItem('news_bookmarks');
+        state.bookmarks = stored ? JSON.parse(stored) : [];
+      } catch (error) {
+        console.error('Error loading bookmarks:', error);
+        state.bookmarks = [];
+      }
+    }
+
+    function saveBookmarks() {
+      try {
+        localStorage.setItem('news_bookmarks', JSON.stringify(state.bookmarks));
+      } catch (error) {
+        console.error('Error saving bookmarks:', error);
+      }
+    }
+
+    function updateBookmarkButton(articleUrl) {
+      const btn = document.querySelector(`button[data-article-url="${articleUrl}"]`);
+      if (!btn) return;
+      const bookmarked = isBookmarked(articleUrl);
+      btn.className = `bookmark-btn ${bookmarked ? 'bookmarked' : ''}`;
+      btn.textContent = bookmarked ? '★' : '☆';
+    }
+
+    function toggleBookmark(articleUrl) {
+      const articleId = generateArticleId(articleUrl);
+      const existingIndex = state.bookmarks.findIndex(b => b.id === articleId);
+      
+      if (existingIndex !== -1) {
+        const deletedBookmark = state.bookmarks[existingIndex];
+        state.bookmarks.splice(existingIndex, 1);
+        saveBookmarks();
+        
+        showUndoNotification('Bookmark removed', () => {
+          state.bookmarks.push(deletedBookmark);
+          saveBookmarks();
+          showToast('✅ Bookmark restored!');
+          updateBookmarkButton(articleUrl);
+        });
+      } else {
+        const article = state.articles.find(a => a.url === articleUrl);
+        if (article) createBookmark(article);
+      }
+      
+      updateBookmarkButton(articleUrl);
+    }
+
+    function showBookmarks() {
+      state.currentView = 'bookmarks';
+      hideError();
+      hideLoading();
+      
+      const container = document.getElementById('articles');
+      const bookmarkedArticles = state.bookmarks.map(b => b.article);
+      
+      // Add bookmark header
+      const headerHtml = state.bookmarks.length > 0 ? `
+        <div class="bookmark-header" style="grid-column: 1/-1;">
+          <div class="bookmark-count">📚 ${state.bookmarks.length} Bookmark${state.bookmarks.length !== 1 ? 's' : ''}</div>
+        </div>
+      ` : '';
+      
+      container.innerHTML = headerHtml;
+      renderArticles(bookmarkedArticles);
+      
+      document.getElementById('pagination').style.display = 'none';
+      
+      const btn = document.getElementById('view-bookmarks');
+      btn.innerHTML = '<span>📰</span> Back to News';
+    }
+
+    function showNews() {
+      state.currentView = 'articles';
+      loadArticles();
+      
+      const btn = document.getElementById('view-bookmarks');
+      btn.innerHTML = '<span>📚</span> Bookmarks';
+    }
+
+    function handleCategoryClick(e) {
+      const btn = e.target.closest('.category-btn');
+      if (btn) {
+        state.activeCategory = btn.dataset.category;
+        state.currentPage = 1;
+        state.searchQuery = '';
+        state.currentView = 'articles';
+        document.getElementById('search').value = '';
+        document.getElementById('search-mobile').value = '';
+        document.getElementById('view-bookmarks').innerHTML = '<span>📚</span> Bookmarks';
+        renderCategories();
+        loadArticles();
+      }
+    }
+
+    function handleLogoClick(e) {
+      e.preventDefault();
+      state.activeCategory = 'general';
+      state.currentPage = 1;
+      state.searchQuery = '';
+      state.currentView = 'articles';
+      document.getElementById('search').value = '';
+      document.getElementById('search-mobile').value = '';
+      document.getElementById('view-bookmarks').innerHTML = '<span>📚</span> Bookmarks';
+      renderCategories();
+      loadArticles();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function handlePaginationClick(e) {
+      const isPrev = e.target.id === 'prev-page';
+      const isNext = e.target.id === 'next-page';
+      
+      if ((isPrev && state.currentPage > 1) || (isNext && state.currentPage < state.totalPages)) {
+        state.currentPage += isPrev ? -1 : 1;
+        loadArticles();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    function handleSearch(e) {
+      const query = e.target.value.trim();
+      
+      clearTimeout(searchTimeout);
+      
+      if (query === '') {
+        state.searchQuery = '';
+        state.currentPage = 1;
+        loadArticles();
+        return;
+      }
+      
+      searchTimeout = setTimeout(() => {
+        state.searchQuery = query;
+        state.currentPage = 1;
+        state.currentView = 'articles';
+        document.getElementById('view-bookmarks').innerHTML = '<span>📚</span> Bookmarks';
+        loadArticles();
+      }, 500);
+    }
+
+    // CRUD Operations for Bookmarks
+    let undoTimeout = null;
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('active');
+      setTimeout(() => {
+        toast.classList.remove('active');
+      }, 3000);
+    }
+
+    function showUndoNotification(message, onUndo) {
+      const notification = document.getElementById('undo-notification');
+      const messageEl = document.getElementById('undo-message');
+      const undoBtn = document.getElementById('undo-btn');
+      
+      messageEl.textContent = message;
+      notification.classList.add('active');
+      
+      // Clear previous timeout
+      if (undoTimeout) {
+        clearTimeout(undoTimeout);
+      }
+      
+      // Remove old event listener
+      const newUndoBtn = undoBtn.cloneNode(true);
+      undoBtn.parentNode.replaceChild(newUndoBtn, undoBtn);
+      
+      // Add new event listener
+      newUndoBtn.addEventListener('click', () => {
+        onUndo();
+        hideUndoNotification();
+      });
+      
+      // Auto-hide after 5 seconds
+      undoTimeout = setTimeout(() => {
+        hideUndoNotification();
+      }, 5000);
+    }
+
+    function hideUndoNotification() {
+      const notification = document.getElementById('undo-notification');
+      notification.classList.remove('active');
+      if (undoTimeout) {
+        clearTimeout(undoTimeout);
+        undoTimeout = null;
+      }
+    }
+
+    function createBookmark(article) {
+      const bookmark = {
+        id: generateArticleId(article.url),
+        article: article,
+        savedAt: Date.now()
+      };
+      state.bookmarks.push(bookmark);
+      saveBookmarks();
+      showToast('✅ Bookmark added!');
+      return bookmark;
+    }
+
+    function deleteBookmark(articleId) {
+      const index = state.bookmarks.findIndex(b => b.id === articleId);
+      if (index === -1) return false;
+      
+      const deletedBookmark = state.bookmarks[index];
+      state.bookmarks.splice(index, 1);
+      saveBookmarks();
+      
+      showUndoNotification('Bookmark deleted', () => {
+        state.bookmarks.push(deletedBookmark);
+        saveBookmarks();
+        showToast('✅ Bookmark restored!');
+        if (state.currentView === 'bookmarks') showBookmarks();
+      });
+      return true;
+    }
+
+    function handleArticleClick(e) {
+      const bookmarkBtn = e.target.closest('.bookmark-btn');
+      const deleteBtn = e.target.closest('.btn-delete');
+      
+      if (bookmarkBtn) {
+        toggleBookmark(bookmarkBtn.dataset.articleUrl);
+      } else if (deleteBtn) {
+        deleteBookmark(deleteBtn.dataset.articleId);
+        showBookmarks();
+      }
+    }
+
+    const handleBookmarksClick = () => state.currentView === 'bookmarks' ? showNews() : showBookmarks();
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadBookmarks();
+      renderCategories();
+      loadArticles();
+      
+      document.getElementById('site-logo').addEventListener('click', handleLogoClick);
+      document.getElementById('category-filters').addEventListener('click', handleCategoryClick);
+      document.getElementById('pagination').addEventListener('click', handlePaginationClick);
+      
+      // Handle both search inputs (desktop and mobile)
+      document.getElementById('search').addEventListener('input', handleSearch);
+      document.getElementById('search-mobile').addEventListener('input', handleSearch);
+      
+      document.getElementById('articles').addEventListener('click', handleArticleClick);
+      document.getElementById('view-bookmarks').addEventListener('click', handleBookmarksClick);
+    });
+  </script>
+</body>
+</html>
