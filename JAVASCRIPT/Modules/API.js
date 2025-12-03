@@ -1,7 +1,7 @@
-// API.js - News API communication
+// api.js - News API communication
 
-// const API_KEY = import.meta.env.VITE_NEWS_API_KEY;
-// const API_BASE_URL = 'https://newsapi.org/v2';
+const API_KEY = import.meta.env.VITE_NEWS_API_KEY;
+const API_BASE_URL = 'https://newsapi.org/v2';
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // 1 second
 
@@ -12,11 +12,7 @@ let apiStatus = {
   rateLimitRemaining: null
 };
 
-/**
- * Generate unique ID for an article from its URL
- * @param {string} url - Article URL
- * @returns {string} Unique ID
- */
+// Generate unique ID for an article from its URL
 function generateArticleId(url) {
   let hash = 0;
   for (let i = 0; i < url.length; i++) {
@@ -27,12 +23,7 @@ function generateArticleId(url) {
   return Math.abs(hash).toString(36);
 }
 
-/**
- * Transform API response to Article model
- * @param {Object} apiArticle - Raw article from API
- * @param {string} category - Article category
- * @returns {Object} Transformed article
- */
+// Transform API response to Article model
 function transformArticle(apiArticle, category = 'general') {
   return {
     id: generateArticleId(apiArticle.url),
@@ -50,12 +41,7 @@ function transformArticle(apiArticle, category = 'general') {
   };
 }
 
-/**
- * Make API request with retry logic
- * @param {string} url - API endpoint URL
- * @param {number} retryCount - Current retry attempt
- * @returns {Promise<Object>} API response
- */
+// Make API request with retry logic
 async function makeRequest(url, retryCount = 0) {
   try {
     const response = await fetch(url);
@@ -133,12 +119,7 @@ async function makeRequest(url, retryCount = 0) {
   }
 }
 
-/**
- * Fetch headlines by category
- * @param {string} category - News category (general, sports, technology, business, entertainment, health, science)
- * @param {number} page - Page number (default: 1)
- * @returns {Promise<Object>} Response with articles and metadata
- */
+// Fetch headlines by category and page number
 export async function fetchHeadlines(category = 'general', page = 1) {
   try {
     const pageSize = 10;
@@ -174,12 +155,7 @@ export async function fetchHeadlines(category = 'general', page = 1) {
   }
 }
 
-/**
- * Search articles by query
- * @param {string} query - Search query
- * @param {number} page - Page number (default: 1)
- * @returns {Promise<Object>} Response with articles and metadata
- */
+// Search articles by query and page number
 export async function searchArticles(query, page = 1) {
   try {
     // Validate query
@@ -231,14 +207,4 @@ export async function searchArticles(query, page = 1) {
       query: query
     };
   }
-}
-
-/**
- * Get API status and health information
- * @returns {Object} API status object
- */
-export function getApiStatus() {
-  return {
-    ...apiStatus
-  };
 }
