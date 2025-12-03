@@ -264,8 +264,11 @@ const handleViewBookmarks = () => currentView === 'bookmarks' ? showNews() : sho
 // Initialize the application
 export async function init() {
   try {
+    console.log('Initializing Samachar app...');
+    
     // Initialize DOM elements
     initializeElements();
+    console.log('DOM elements initialized');
 
     // Initialize store
     initializeStore();
@@ -292,13 +295,15 @@ export async function init() {
 
     // Subscribe to state changes
     subscribe((state) => {
-      if (import.meta.env.DEV) {
+      if (import.meta.env?.DEV) {
         console.log('State updated:', state);
       }
     });
 
     // Load initial articles
+    console.log('Loading initial articles...');
     await loadArticles();
+    console.log('App initialized successfully!');
 
   } catch (error) {
     console.error('Initialization error:', error);
