@@ -1084,7 +1084,7 @@
         showUndoNotification('Bookmark removed', () => {
           state.bookmarks.push(deletedBookmark);
           saveBookmarks();
-          showToast('✅ Bookmark restored!');
+          showToast('Bookmark restored!');
           updateBookmarkButton(articleUrl);
         });
       } else {
@@ -1289,7 +1289,7 @@
       };
       state.bookmarks.push(bookmark);
       saveBookmarks();
-      showToast('✅ Bookmark added!');
+      showToast('Bookmark added!');
       return bookmark;
     }
 
@@ -1304,7 +1304,7 @@
       showUndoNotification('Bookmark deleted', () => {
         state.bookmarks.push(deletedBookmark);
         saveBookmarks();
-        showToast('✅ Bookmark restored!');
+        showToast('Bookmark restored!');
         if (state.currentView === 'bookmarks') showBookmarks();
       });
       return true;

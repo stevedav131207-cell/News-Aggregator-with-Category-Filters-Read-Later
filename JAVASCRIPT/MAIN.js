@@ -1,9 +1,9 @@
 // main.js - Application entry point
 
-import { getState, setState, subscribe, initializeStore, createBookmark, deleteBookmark, getBookmarks } from './modules/store.js';
-import { fetchHeadlines, searchArticles } from './modules/api.js';
-import { renderArticles, renderPagination, renderCategoryFilters, showError, hideError, showLoading, hideLoading, updateBookmarkButton, showUndoNotification, showToast } from './modules/ui.js';
-import { initializeEventListeners } from './modules/events.js';
+import { getState, setState, subscribe, initializeStore, createBookmark, deleteBookmark, getBookmarks } from './Modules/store.js';
+import { fetchHeadlines, searchArticles } from './Modules/api.js';
+import { renderArticles, renderPagination, renderCategoryFilters, showError, hideError, showLoading, hideLoading, updateBookmarkButton, showUndoNotification, showToast } from './Modules/ui.js';
+import { initializeEventListeners } from './Modules/events.js';
 
 // DOM elements
 let elements = {};
@@ -205,14 +205,14 @@ function handleBookmarkToggle(_articleUrl, articleId, isCurrentlyBookmarked) {
       if (lastRemovedBookmark) {
         createBookmark(lastRemovedBookmark.article);
         updateBookmarkButton(articleId, true);
-        showToast('✅ Bookmark restored!');
+        showToast('Bookmark restored!');
       }
     });
   } else {
     // Add bookmark
     createBookmark(article);
     updateBookmarkButton(articleId, true);
-    showToast('✅ Bookmark added!');
+    showToast('Bookmark added!');
   }
 }
 
@@ -292,7 +292,7 @@ export async function init() {
     
     // Initialize DOM elements
     initializeElements();
-    console.log('✅ DOM elements initialized');
+    console.log('DOM elements initialized');
 
     // Initialize store
     initializeStore();
@@ -325,12 +325,12 @@ export async function init() {
     });
 
     // Load initial articles
-    console.log('📰 Loading initial articles...');
+    console.log('Loading initial articles...');
     await loadArticles();
-    console.log('✅ App initialized successfully!');
+    console.log('App initialized successfully!');
 
   } catch (error) {
-    console.error('❌ Initialization error:', error);
+    console.error('Initialization error:', error);
     alert('Failed to initialize application. Please refresh the page.');
   }
 }
