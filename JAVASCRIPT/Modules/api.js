@@ -1,7 +1,7 @@
 // api.js - NewsData.io API communication
 
 // Try to get API key from Vite env, fallback to hardcoded for Live Server
-const API_KEY = import.meta.env?.VITE_NEWSDATA_API_KEY || 'pub_1ec12e2ca3e34df6af05d09b5ea8b381';
+const API_KEY = import.meta.env?.VITE_NEWSDATA_API_KEY || 'pub_46d99e1a6a2a4432b67d2d6afc795778';
 const API_BASE_URL = 'https://newsdata.io/api/1';
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000;
