@@ -1,7 +1,7 @@
 // API.js - News API communication
 
 // Try to get API key from Vite env, fallback to hardcoded for Live Server
-const API_KEY = import.meta.env?.VITE_NEWS_API_KEY || '456550deb53f4bcebfc882cb397bb4c6';
+const API_KEY = import.meta.env?.VITE_NEWS_API_KEY || '109ffe55c2324d04bdbdd9b1f9c1ad1d';
 const API_BASE_URL = 'https://newsapi.org/v2';
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // 1 second
