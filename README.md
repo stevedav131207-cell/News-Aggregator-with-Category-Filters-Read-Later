@@ -1,91 +1,102 @@
-# News Website
+# Samachar - News Website
 
-A modular, accessible, and responsive news website built with vanilla JavaScript, HTML, and CSS. Features include category filtering, search, pagination, sorting, bookmarks, and client-side caching.
+A responsive news website built with vanilla JavaScript, HTML, and CSS. Features category filtering, search, pagination, and bookmarks.
+
+## Live Demo
+
+Open `main.html` in your browser or deploy to GitHub Pages.
 
 ## Features
 
-- 📰 Fetch latest headlines from News API
-- 🔍 Debounced search functionality
-- 📑 Category filtering (Sports, Technology, Business, Entertainment, Health, Science)
-- 📄 Pagination with navigation controls
-- 🔄 Sort by date or relevance
-- 📚 Bookmark articles with undo support
-- 💾 Client-side caching with IndexedDB/localStorage
-- ♿ Full accessibility support (ARIA, keyboard navigation)
-- 📱 Responsive design for all devices
-- ⚡ Performance optimized
+- Fetch latest headlines from NewsData.io API
+- Debounced search (800ms, min 2 characters)
+- Category filtering (General, Business, Technology, Sports, Entertainment, Health, Science)
+- Client-side pagination (3 articles per page)
+- Bookmark articles with undo support (5 seconds)
+- Responsive design (Mobile, Tablet, Desktop)
+- Accessibility support (ARIA, keyboard navigation)
 
 ## Project Structure
 
 ```
-news-website/
-├── index.html              # Main HTML file
+samachar/
+├── index-simple.html       # Standalone version (recommended)
+├── index.html              # Modular version (requires Vite)
 ├── css/
-│   └── styles.css          # All styles with CSS custom properties
+│   └── styles.css          # Styles for index.html
 ├── js/
-│   ├── main.js             # Application entry point
-│   └── modules/
-│       ├── api.js          # News API communication
-│       ├── ui.js           # DOM manipulation and rendering
-│       ├── events.js       # Event handling
-│       └── store.js        # State management and storage
-├── tests/
-│   └── setup.js            # Test configuration
-├── package.json
-├── vitest.config.js
-└── README.md
+    ├── main.js             # App entry point
+    └── modules/
+        ├── api.js          # NewsData.io API
+        ├── ui.js           # DOM rendering
+        ├── events.js       # Event handling
+        └── store.js        # State & bookmarks
 ```
 
-### Prerequisites
+## Quick Start
 
-- Node.js (v18 or higher)
-- npm or yarn
-- News API key (get one at https://newsapi.org/)
+### Option 1: Standalone (Easiest)
+
+1. Open `main.html` in your browser
+2. That's it! Works with Live Server too.
 
 
-### Usage
+## API Configuration
 
-1. **Browse Headlines**: View the latest news in the default "General" category
-2. **Filter by Category**: Click category buttons to filter news by topic
-3. **Search**: Type in the search box to find specific articles (debounced 500ms)
-4. **Sort**: Choose between "Latest" (by date) or "Relevance" sorting
-5. **Bookmark**: Click the star icon to save articles for later
-6. **View Bookmarks**: Click the "Bookmarks" button to see saved articles
-7. **Pagination**: Navigate through multiple pages of results
-8. **Undo**: After removing a bookmark, you have 5 seconds to undo
+The app uses **NewsData.io API**. The API key is already configured.
 
-## Architecture
+To use your own key:
 
-The application follows a modular ES6 architecture with clear separation of concerns:
+1. Get a free key from [newsdata.io](https://newsdata.io/)
+2. Update in `index-simple.html` (line ~838):
+   ```javascript
+   const API_KEY = "your_api_key_here";
+   ```
 
-- **main.js**: Initializes the application and coordinates modules
-- **api.js**: Handles all News API communication
-- **ui.js**: Manages DOM manipulation and rendering
-- **events.js**: Handles user interactions and event delegation
-- **store.js**: Manages application state and persistent storage
+## Deployment
+
+### GitHub Pages (Recommended)
+
+1. Push to GitHub
+2. Go to repo Settings → Pages
+3. Select branch and save
+4. Your site is live!
+
+### Netlify
+
+1. Push to GitHub
+2. Connect repo to Netlify
+
+
+## Usage
+
+- **Browse**: View latest news in selected category
+- **Filter**: Click category buttons to filter
+- **Search**: Type 2+ characters to search (waits 800ms)
+- **Bookmark**: Click ☆ to save, ★ to remove
+- **View Bookmarks**: Click "Bookmarks" button
+- **Navigate**: Use pagination buttons
+
+## Tech Stack
+
+- Vanilla JavaScript (ES6+)
+- HTML5 & CSS3
+- NewsData.io API
+- Vite (optional, for build)
+
+## Responsive Breakpoints
+
+- Mobile: < 480px (1 column)
+- Tablet: 481px - 1024px (2 columns)
+- Desktop: > 1024px (3 columns)
 
 ## Accessibility
 
-- ARIA roles and labels on all interactive elements
-- Keyboard navigation support (Tab, Enter, Space, Arrow keys)
-- Skip links for quick navigation
-- Visible focus indicators
+- ARIA roles and labels
+- Keyboard navigation (Tab, Enter)
+- Skip to main content link
+- Focus indicators
 - Screen reader friendly
-
-## Browser Support
-
-- Chrome/Edge (last 2 versions)
-- Firefox (last 2 versions)
-- Safari (last 2 versions)
-- Mobile browsers (iOS Safari, Chrome Android)
-
-## Performance
-
-- Client-side caching with 15-minute TTL
-- Debounced search (500ms)
-- Lazy loading for images
-- Optimized DOM updates
-- Request deduplication
 
 ## License
 
