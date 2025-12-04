@@ -355,6 +355,11 @@
       flex: 1;
       line-height: 1.5;
       font-size: 0.9rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
     .article-actions {
@@ -817,7 +822,7 @@
   </main>
 
   <footer role="contentinfo" class="footer">
-    <p>&copy; 2025 Samachar. Powered by News API.</p>
+    <p>&copy; 2025 Samachar. Powered by NewsData.io API.</p>
   </footer>
 
   <!-- Toast Notification -->
@@ -830,8 +835,8 @@
   </div>
 
   <script>
-    const API_KEY = '109ffe55c2324d04bdbdd9b1f9c1ad1d';
-    const API_BASE_URL = 'https://newsapi.org/v2';
+    const API_KEY = 'pub_1ec12e2ca3e34df6af05d09b5ea8b381';
+    const API_BASE_URL = 'https://newsdata.io/api/1';
     
     let state = {
       articles: [],
@@ -844,6 +849,10 @@
     };
     
     let searchTimeout = null;
+    
+    // Client-side pagination settings
+    const ARTICLES_PER_PAGE = 3;
+    let allArticles = []; // Store all fetched articles for client-side pagination
 
     const CATEGORIES = [
       { value: 'general', label: 'General' },
@@ -856,20 +865,17 @@
     ];
 
     function formatDate(dateString) {
-      const date = new Date(dateString);
-      const now = new Date();
-      const diffTime = Math.abs(now - date);
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      const diffDays = Math.floor((Date.now() - new Date(dateString)) / 86400000);
       if (diffDays === 0) return 'Today';
       if (diffDays === 1) return 'Yesterday';
       if (diffDays < 7) return `${diffDays} days ago`;
-      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+      return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
     }
 
     function toggleElement(id, show, content = '') {
       const el = document.getElementById(id);
       el.style.display = show ? 'block' : 'none';
-      el.setAttribute('aria-hidden', !show);
+      el.setAttribute('aria-hidden', String(!show));
       if (content) el.innerHTML = content;
     }
 
@@ -892,17 +898,13 @@
     function generateArticleId(url) {
       let hash = 0;
       for (let i = 0; i < url.length; i++) {
-        const char = url.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash;
+        hash = ((hash << 5) - hash) + url.charCodeAt(i);
+        hash |= 0;
       }
       return Math.abs(hash).toString(36);
     }
 
-    function isBookmarked(articleUrl) {
-      const id = generateArticleId(articleUrl);
-      return state.bookmarks.some(b => b.id === id);
-    }
+    const isBookmarked = (url) => state.bookmarks.some(b => b.id === generateArticleId(url));
 
     function renderArticles(articles) {
       const container = document.getElementById('articles');
@@ -976,41 +978,78 @@
       `;
     }
 
-    async function loadArticles() {
-      showLoading();
-      hideError();
-      
-      try {
-        let url;
-        if (state.searchQuery) {
-          url = `${API_BASE_URL}/everything?q=${encodeURIComponent(state.searchQuery)}&page=${state.currentPage}&pageSize=10&sortBy=publishedAt&apiKey=${API_KEY}`;
-        } else {
-          url = `${API_BASE_URL}/top-headlines?category=${state.activeCategory}&page=${state.currentPage}&pageSize=10&apiKey=${API_KEY}`;
+    async function loadArticles(forceRefresh = false) {
+      // If we need to fetch new articles (category/search changed or forced refresh)
+      if (forceRefresh || allArticles.length === 0) {
+        showLoading();
+        hideError();
+        
+        try {
+          let url;
+          // NewsData.io category mapping
+          const categoryMap = {
+            'general': 'top',
+            'business': 'business',
+            'technology': 'technology',
+            'sports': 'sports',
+            'entertainment': 'entertainment',
+            'health': 'health',
+            'science': 'science'
+          };
+          
+          if (state.searchQuery) {
+            url = `${API_BASE_URL}/news?apikey=${API_KEY}&q=${encodeURIComponent(state.searchQuery)}&language=en`;
+          } else {
+            const category = categoryMap[state.activeCategory] || 'top';
+            url = `${API_BASE_URL}/news?apikey=${API_KEY}&category=${category}&language=en`;
+          }
+          
+          const response = await fetch(url);
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          
+          if (data.status === 'error') {
+            throw new Error(data.results?.message || 'Failed to fetch articles');
+          }
+          
+          // Transform NewsData.io response and store all articles
+          const transformedArticles = (data.results || []).filter(article => article.title && article.link).map(article => ({
+            ...article,
+            url: article.link,
+            urlToImage: article.image_url || '',
+            publishedAt: article.pubDate,
+            source: {
+              name: article.source_name || article.source_id || 'Unknown Source',
+              id: article.source_id || ''
+            }
+          }));
+          
+          // Remove duplicate articles by URL
+          const seen = new Set();
+          allArticles = transformedArticles.filter(a => !seen.has(a.url) && seen.add(a.url));
+          
+          hideLoading();
+        } catch (error) {
+          hideLoading();
+          console.error('Error:', error);
+          showError('Failed to load articles. Please try again.');
+          allArticles = [];
+          return;
         }
-        
-        const response = await fetch(url);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        if (data.status === 'error') {
-          throw new Error(data.message || 'Failed to fetch articles');
-        }
-        
-        state.articles = data.articles || [];
-        state.totalPages = Math.ceil((data.totalResults || 0) / 10);
-        
-        hideLoading();
-        renderArticles(state.articles);
-        renderPagination();
-      } catch (error) {
-        hideLoading();
-        console.error('Error:', error);
-        showError('Failed to load articles. Please try again.');
       }
+      
+      // Client-side pagination: slice articles for current page
+      state.totalPages = Math.ceil(allArticles.length / ARTICLES_PER_PAGE);
+      const startIndex = (state.currentPage - 1) * ARTICLES_PER_PAGE;
+      const endIndex = startIndex + ARTICLES_PER_PAGE;
+      state.articles = allArticles.slice(startIndex, endIndex);
+      
+      renderArticles(state.articles);
+      renderPagination();
     }
 
     function loadBookmarks() {
@@ -1023,13 +1062,7 @@
       }
     }
 
-    function saveBookmarks() {
-      try {
-        localStorage.setItem('news_bookmarks', JSON.stringify(state.bookmarks));
-      } catch (error) {
-        console.error('Error saving bookmarks:', error);
-      }
-    }
+    const saveBookmarks = () => localStorage.setItem('news_bookmarks', JSON.stringify(state.bookmarks));
 
     function updateBookmarkButton(articleUrl) {
       const btn = document.querySelector(`button[data-article-url="${articleUrl}"]`);
@@ -1070,15 +1103,49 @@
       const container = document.getElementById('articles');
       const bookmarkedArticles = state.bookmarks.map(b => b.article);
       
-      // Add bookmark header
-      const headerHtml = state.bookmarks.length > 0 ? `
-        <div class="bookmark-header" style="grid-column: 1/-1;">
-          <div class="bookmark-count">📚 ${state.bookmarks.length} Bookmark${state.bookmarks.length !== 1 ? 's' : ''}</div>
-        </div>
-      ` : '';
-      
-      container.innerHTML = headerHtml;
-      renderArticles(bookmarkedArticles);
+      // Render bookmarks directly (don't use renderArticles which overwrites)
+      if (!bookmarkedArticles || bookmarkedArticles.length === 0) {
+        container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 2rem; color: #64748b;" role="status">
+          <p style="font-size: 1.125rem; margin-bottom: 1rem;">No bookmarks yet</p>
+          <p>Bookmark articles to read them later</p>
+        </div>`;
+      } else {
+        // Add bookmark header
+        const headerHtml = `
+          <div class="bookmark-header" style="grid-column: 1/-1;">
+            <div class="bookmark-count">📚 ${state.bookmarks.length} Bookmark${state.bookmarks.length !== 1 ? 's' : ''}</div>
+          </div>
+        `;
+        
+        const articlesHTML = bookmarkedArticles.map((article, index) => {
+          const articleId = generateArticleId(article.url);
+          return `
+          <article class="article-card bookmark-card" data-article-id="${articleId}" style="animation-delay: ${index * 0.05}s">
+            <div class="bookmark-menu">
+              <button class="btn-delete" data-article-id="${articleId}" title="Delete bookmark" aria-label="Delete ${article.title} from bookmarks" tabindex="0">
+                <span aria-hidden="true">🗑️</span>
+              </button>
+            </div>
+            ${article.urlToImage ? 
+              `<img src="${article.urlToImage}" alt="${article.title}" class="article-image" loading="lazy" decoding="async">` :
+              '<div class="article-image" style="background: #fee2e2; display: flex; align-items: center; justify-content: center; color: #dc2626; font-weight: 600; font-size: 1rem;" role="img" aria-label="No image available">No Image</div>'
+            }
+            <div class="article-content">
+              <div class="article-meta">
+                <span class="article-source">${article.source.name}</span>
+                <time class="article-date" datetime="${article.publishedAt}">${formatDate(article.publishedAt)}</time>
+              </div>
+              <h2 class="article-title">${article.title}</h2>
+              <p class="article-description">${article.description || 'No description available'}</p>
+              <div class="article-actions">
+                <a href="${article.url}" target="_blank" rel="noopener noreferrer" class="article-link" aria-label="Read full article: ${article.title}">Read More</a>
+              </div>
+            </div>
+          </article>
+        `}).join('');
+        
+        container.innerHTML = headerHtml + articlesHTML;
+      }
       
       document.getElementById('pagination').style.display = 'none';
       
@@ -1088,7 +1155,7 @@
 
     function showNews() {
       state.currentView = 'articles';
-      loadArticles();
+      loadArticles(false); // Use cached articles if available
       
       const btn = document.getElementById('view-bookmarks');
       btn.innerHTML = '<span>📚</span> Bookmarks';
@@ -1097,6 +1164,7 @@
     function handleCategoryClick(e) {
       const btn = e.target.closest('.category-btn');
       if (btn) {
+        allArticles = []; // Clear cached articles to force new fetch
         state.activeCategory = btn.dataset.category;
         state.currentPage = 1;
         state.searchQuery = '';
@@ -1105,12 +1173,13 @@
         document.getElementById('search-mobile').value = '';
         document.getElementById('view-bookmarks').innerHTML = '<span>📚</span> Bookmarks';
         renderCategories();
-        loadArticles();
+        loadArticles(true);
       }
     }
 
     function handleLogoClick(e) {
       e.preventDefault();
+      allArticles = []; // Clear cached articles to force new fetch
       state.activeCategory = 'general';
       state.currentPage = 1;
       state.searchQuery = '';
@@ -1119,7 +1188,7 @@
       document.getElementById('search-mobile').value = '';
       document.getElementById('view-bookmarks').innerHTML = '<span>📚</span> Bookmarks';
       renderCategories();
-      loadArticles();
+      loadArticles(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -1129,7 +1198,7 @@
       
       if ((isPrev && state.currentPage > 1) || (isNext && state.currentPage < state.totalPages)) {
         state.currentPage += isPrev ? -1 : 1;
-        loadArticles();
+        loadArticles(false); // Don't refetch, just paginate cached articles
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
@@ -1139,20 +1208,27 @@
       
       clearTimeout(searchTimeout);
       
-      if (query === '') {
-        state.searchQuery = '';
-        state.currentPage = 1;
-        loadArticles();
+      // Only search if query has at least 2 characters
+      if (query.length < 2) {
+        // If search was active and now cleared, reload default articles
+        if (state.searchQuery !== '' && query === '') {
+          allArticles = [];
+          state.searchQuery = '';
+          state.currentPage = 1;
+          loadArticles(true);
+        }
         return;
       }
       
+      // Debounce search - wait 800ms after user stops typing
       searchTimeout = setTimeout(() => {
+        allArticles = [];
         state.searchQuery = query;
         state.currentPage = 1;
         state.currentView = 'articles';
         document.getElementById('view-bookmarks').innerHTML = '<span>📚</span> Bookmarks';
-        loadArticles();
-      }, 500);
+        loadArticles(true);
+      }, 800);
     }
 
     // CRUD Operations for Bookmarks
@@ -1241,8 +1317,12 @@
       if (bookmarkBtn) {
         toggleBookmark(bookmarkBtn.dataset.articleUrl);
       } else if (deleteBtn) {
+        const wasInBookmarksView = state.currentView === 'bookmarks';
         deleteBookmark(deleteBtn.dataset.articleId);
-        showBookmarks();
+        // Stay in bookmark view and refresh it immediately
+        if (wasInBookmarksView) {
+          showBookmarks();
+        }
       }
     }
 

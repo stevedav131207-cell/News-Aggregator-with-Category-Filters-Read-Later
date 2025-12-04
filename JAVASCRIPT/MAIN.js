@@ -1,9 +1,9 @@
-// MAIN.js - Application entry point
+// main.js - Application entry point
 
-import { getState, setState, subscribe, initializeStore, createBookmark, deleteBookmark, getBookmarks } from './Modules/STORE.js';
-import { fetchHeadlines, searchArticles } from './Modules/API.js';
-import { renderArticles, renderPagination, renderCategoryFilters, showError, hideError, showLoading, hideLoading, updateBookmarkButton, showUndoNotification, showToast } from './Modules/UI.js';
-import { initializeEventListeners } from './Modules/EVENTS.js';
+import { getState, setState, subscribe, initializeStore, createBookmark, deleteBookmark, getBookmarks } from './modules/store.js';
+import { fetchHeadlines, searchArticles } from './modules/api.js';
+import { renderArticles, renderPagination, renderCategoryFilters, showError, hideError, showLoading, hideLoading, updateBookmarkButton, showUndoNotification, showToast } from './modules/ui.js';
+import { initializeEventListeners } from './modules/events.js';
 
 // DOM elements
 let elements = {};
@@ -23,6 +23,10 @@ const CATEGORIES = [
 let currentView = 'articles'; // 'articles' or 'bookmarks'
 let lastRemovedBookmark = null;
 
+// Client-side pagination settings
+const ARTICLES_PER_PAGE = 3;
+let allArticles = []; // Store all fetched articles for client-side pagination
+
 // Initialize DOM element references
 function initializeElements() {
   elements = {
@@ -38,48 +42,63 @@ function initializeElements() {
 }
 
 // Load and display articles
-async function loadArticles() {
+async function loadArticles(forceRefresh = false) {
   const state = getState();
   const { activeCategory, searchQuery, currentPage } = state;
 
-  showLoading(elements.loadingContainer);
-  hideError(elements.errorContainer);
+  // If we need to fetch new articles (category/search changed or forced refresh)
+  if (forceRefresh || allArticles.length === 0) {
+    showLoading(elements.loadingContainer);
+    hideError(elements.errorContainer);
 
-  try {
-    let response;
+    try {
+      let response;
 
-    if (searchQuery) {
-      response = await searchArticles(searchQuery, currentPage);
-    } else {
-      response = await fetchHeadlines(activeCategory, currentPage);
-    }
+      if (searchQuery) {
+        response = await searchArticles(searchQuery, 1);
+      } else {
+        response = await fetchHeadlines(activeCategory, 1);
+      }
 
-    hideLoading(elements.loadingContainer);
+      hideLoading(elements.loadingContainer);
 
-    if (response.status === 'error') {
-      showError(response.error.message, elements.errorContainer);
+      if (response.status === 'error') {
+        showError(response.error.message, elements.errorContainer);
+        setState({ articles: [], totalPages: 0 });
+        allArticles = [];
+        renderArticles([], elements.articlesContainer, getBookmarks(), false);
+        renderPagination(1, 0, elements.paginationContainer);
+        return;
+      }
+
+      // Store all articles for client-side pagination
+      allArticles = response.articles;
+
+    } catch (error) {
+      hideLoading(elements.loadingContainer);
+      console.error('Error loading articles:', error);
+      showError('Failed to load articles. Please try again.', elements.errorContainer);
       setState({ articles: [], totalPages: 0 });
-      renderArticles([], elements.articlesContainer, getBookmarks(), false);
-      renderPagination(1, 0, elements.paginationContainer);
+      allArticles = [];
       return;
     }
-
-    // Update state
-    setState({
-      articles: response.articles,
-      totalPages: response.totalPages || Math.ceil(response.totalResults / 10)
-    });
-
-    // Render articles and pagination
-    renderArticles(response.articles, elements.articlesContainer, getBookmarks(), false);
-    renderPagination(currentPage, response.totalPages || 1, elements.paginationContainer);
-
-  } catch (error) {
-    hideLoading(elements.loadingContainer);
-    console.error('Error loading articles:', error);
-    showError('Failed to load articles. Please try again.', elements.errorContainer);
-    setState({ articles: [], totalPages: 0 });
   }
+
+  // Client-side pagination: slice articles for current page
+  const totalPages = Math.ceil(allArticles.length / ARTICLES_PER_PAGE);
+  const startIndex = (currentPage - 1) * ARTICLES_PER_PAGE;
+  const endIndex = startIndex + ARTICLES_PER_PAGE;
+  const pageArticles = allArticles.slice(startIndex, endIndex);
+
+  // Update state
+  setState({
+    articles: pageArticles,
+    totalPages: totalPages
+  });
+
+  // Render articles and pagination
+  renderArticles(pageArticles, elements.articlesContainer, getBookmarks(), false);
+  renderPagination(currentPage, totalPages, elements.paginationContainer);
 }
 
 // Reset to articles view
@@ -99,6 +118,7 @@ function resetToArticlesView(category = null) {
 
 // Handle category change
 function handleCategoryChange(category) {
+  allArticles = []; // Clear cached articles to force new fetch
   setState({
     activeCategory: category,
     currentPage: 1,
@@ -107,11 +127,12 @@ function handleCategoryChange(category) {
   });
 
   resetToArticlesView(category);
-  loadArticles();
+  loadArticles(true);
 }
 
 // Handle logo click
 function handleLogoClick() {
+  allArticles = []; // Clear cached articles to force new fetch
   setState({
     activeCategory: 'general',
     currentPage: 1,
@@ -120,12 +141,13 @@ function handleLogoClick() {
   });
 
   resetToArticlesView('general');
-  loadArticles();
+  loadArticles(true);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // Handle search
 function handleSearch(query) {
+  allArticles = []; // Clear cached articles to force new fetch
   setState({
     searchQuery: query,
     currentPage: 1,
@@ -133,25 +155,26 @@ function handleSearch(query) {
   });
 
   resetToArticlesView();
-  loadArticles();
+  loadArticles(true);
 }
 
 // Handle search clear
 function handleSearchClear() {
+  allArticles = []; // Clear cached articles to force new fetch
   setState({
     searchQuery: '',
     currentPage: 1
   });
 
-  loadArticles();
+  loadArticles(true);
 }
 
-// Handle pagination
+// Handle pagination (client-side, no API refetch needed)
 function handleNextPage() {
   const { currentPage, totalPages } = getState();
   if (currentPage < totalPages) {
     setState({ currentPage: currentPage + 1 });
-    loadArticles();
+    loadArticles(false); // Don't refetch, just paginate cached articles
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }
@@ -160,7 +183,7 @@ function handlePreviousPage() {
   const { currentPage } = getState();
   if (currentPage > 1) {
     setState({ currentPage: currentPage - 1 });
-    loadArticles();
+    loadArticles(false); // Don't refetch, just paginate cached articles
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }
@@ -195,6 +218,7 @@ function handleBookmarkToggle(_articleUrl, articleId, isCurrentlyBookmarked) {
 
 // Handle bookmark delete (from bookmarks view)
 function handleBookmarkDelete(articleId) {
+  const wasInBookmarksView = currentView === 'bookmarks';
   lastRemovedBookmark = deleteBookmark(articleId);
   
   // Show undo notification
@@ -203,14 +227,14 @@ function handleBookmarkDelete(articleId) {
       createBookmark(lastRemovedBookmark.article);
       showToast('✅ Bookmark restored!');
       if (currentView === 'bookmarks') {
-        handleViewBookmarks(); // Refresh bookmarks view
+        showBookmarks(); // Refresh bookmarks view
       }
     }
   });
 
-  // Refresh bookmarks view
-  if (currentView === 'bookmarks') {
-    setTimeout(() => handleViewBookmarks(), 100);
+  // Stay in bookmark view and refresh it immediately
+  if (wasInBookmarksView) {
+    showBookmarks();
   }
 }
 
@@ -232,8 +256,8 @@ function showBookmarks() {
     </div>
   ` : '';
   
-  elements.articlesContainer.innerHTML = headerHtml;
-  renderArticles(bookmarkedArticles, elements.articlesContainer, bookmarks, true);
+  // Pass header to renderArticles so it doesn't get overwritten
+  renderArticles(bookmarkedArticles, elements.articlesContainer, bookmarks, true, headerHtml);
   
   // Hide pagination in bookmarks view
   if (elements.paginationContainer) {
@@ -264,11 +288,11 @@ const handleViewBookmarks = () => currentView === 'bookmarks' ? showNews() : sho
 // Initialize the application
 export async function init() {
   try {
-    console.log('Initializing Samachar app...');
+    console.log('🚀 Initializing Samachar app...');
     
     // Initialize DOM elements
     initializeElements();
-    console.log('DOM elements initialized');
+    console.log('✅ DOM elements initialized');
 
     // Initialize store
     initializeStore();
@@ -301,12 +325,12 @@ export async function init() {
     });
 
     // Load initial articles
-    console.log('Loading initial articles...');
+    console.log('📰 Loading initial articles...');
     await loadArticles();
-    console.log('App initialized successfully!');
+    console.log('✅ App initialized successfully!');
 
   } catch (error) {
-    console.error('Initialization error:', error);
+    console.error('❌ Initialization error:', error);
     alert('Failed to initialize application. Please refresh the page.');
   }
 }

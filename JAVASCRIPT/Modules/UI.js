@@ -1,25 +1,12 @@
-// UI.js - DOM manipulation and rendering
+// ui.js - DOM manipulation and rendering
 
 // Format date to readable string
 function formatDate(dateString) {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffTime = Math.abs(now - date);
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 0) {
-    return 'Today';
-  } else if (diffDays === 1) {
-    return 'Yesterday';
-  } else if (diffDays < 7) {
-    return `${diffDays} days ago`;
-  } else {
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
-    });
-  }
+  const diffDays = Math.floor((Date.now() - new Date(dateString)) / 86400000);
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays} days ago`;
+  return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 // Create article card element with staggered animation
@@ -63,7 +50,7 @@ function createArticleCard(article, isBookmarked = false, isBookmarkView = false
 }
 
 // Render articles to container
-export function renderArticles(articles, container, bookmarks = [], isBookmarkView = false) {
+export function renderArticles(articles, container, bookmarks = [], isBookmarkView = false, headerHtml = '') {
   if (!container) return;
 
   if (!articles || articles.length === 0) {
@@ -80,7 +67,7 @@ export function renderArticles(articles, container, bookmarks = [], isBookmarkVi
     return createArticleCard(article, isBookmarked, isBookmarkView, index);
   }).join('');
 
-  container.innerHTML = articlesHTML;
+  container.innerHTML = headerHtml + articlesHTML;
 }
 
 // Render pagination controls
@@ -115,39 +102,21 @@ export function renderCategoryFilters(categories, activeCategory, container) {
   ).join('');
 }
 
-// Show error message
-export function showError(message, container) {
+// Toggle element visibility
+function toggleVisibility(container, show, content = null) {
   if (!container) return;
-
-  container.innerHTML = `<p>${message}</p>`;
-  container.setAttribute('aria-hidden', 'false');
-  container.style.display = 'block';
+  container.style.display = show ? 'block' : 'none';
+  container.setAttribute('aria-hidden', String(!show));
+  if (content !== null) container.innerHTML = content;
 }
 
-// Hide error message
-export function hideError(container) {
-  if (!container) return;
+// Show/hide error message
+export const showError = (message, container) => toggleVisibility(container, true, `<p>${message}</p>`);
+export const hideError = (container) => toggleVisibility(container, false, '');
 
-  container.innerHTML = '';
-  container.setAttribute('aria-hidden', 'true');
-  container.style.display = 'none';
-}
-
-// Show loading indicator
-export function showLoading(container) {
-  if (!container) return;
-
-  container.setAttribute('aria-hidden', 'false');
-  container.style.display = 'block';
-}
-
-// Hide loading indicator
-export function hideLoading(container) {
-  if (!container) return;
-
-  container.setAttribute('aria-hidden', 'true');
-  container.style.display = 'none';
-}
+// Show/hide loading indicator
+export const showLoading = (container) => toggleVisibility(container, true);
+export const hideLoading = (container) => toggleVisibility(container, false);
 
 // Update bookmark button state
 export function updateBookmarkButton(articleId, isBookmarked) {

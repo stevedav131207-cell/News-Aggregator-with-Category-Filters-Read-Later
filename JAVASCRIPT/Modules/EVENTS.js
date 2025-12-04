@@ -1,4 +1,4 @@
- // EVENTS.js - Event handling and user interactions
+ // events.js - Event handling and user interactions
 
 // Event handlers storage
 let eventHandlers = {};
@@ -72,25 +72,33 @@ export function initializeEventListeners(handlers) {
 export function attachSearchEvents(searchInput) {
   if (!searchInput) return;
 
-  // Debounced search handler (500ms)
+  let lastSearchQuery = '';
+
+  // Debounced search handler (800ms)
   const debouncedSearch = debounce((query) => {
     if (eventHandlers.onSearch) {
       eventHandlers.onSearch(query);
     }
-  }, 500);
+  }, 800);
 
   // Input event for search
   searchInput.addEventListener('input', (e) => {
     const query = e.target.value.trim();
     
-    // If query is empty, restore previous state immediately
-    if (query === '') {
-      if (eventHandlers.onSearchClear) {
-        eventHandlers.onSearchClear();
+    // Only search if query has at least 2 characters
+    if (query.length < 2) {
+      // If search was active and now cleared, restore default articles
+      if (lastSearchQuery !== '' && query === '') {
+        lastSearchQuery = '';
+        if (eventHandlers.onSearchClear) {
+          eventHandlers.onSearchClear();
+        }
       }
-    } else {
-      debouncedSearch(query);
+      return;
     }
+    
+    lastSearchQuery = query;
+    debouncedSearch(query);
   });
 }
 

@@ -1,4 +1,4 @@
-// STORE.js - Application state management and persistent storage
+// store.js - Application state management and persistent storage
 
 // Initial state structure
 let state = {
@@ -43,9 +43,8 @@ function notifySubscribers() {
 export function generateArticleId(url) {
   let hash = 0;
   for (let i = 0; i < url.length; i++) {
-    const char = url.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash;
+    hash = ((hash << 5) - hash) + url.charCodeAt(i);
+    hash |= 0;
   }
   return Math.abs(hash).toString(36);
 }
