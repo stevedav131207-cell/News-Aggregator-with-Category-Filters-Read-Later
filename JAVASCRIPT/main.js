@@ -16,7 +16,7 @@ const CATEGORIES = [
   { value: 'sports', label: 'Sports' },
   { value: 'entertainment', label: 'Entertainment' },
   { value: 'health', label: 'Health' },
-  { value: 'science', label: 'Science' }
+  { value: 'science', label: 'Science' } 
 ];
 
 // View mode
@@ -24,7 +24,7 @@ let currentView = 'articles'; // 'articles' or 'bookmarks'
 let lastRemovedBookmark = null;
 
 // Client-side pagination settings
-const ARTICLES_PER_PAGE = 3;
+const ARTICLES_PER_PAGE = 6;
 let allArticles = []; // Store all fetched articles for client-side pagination
 
 // Initialize DOM element references
@@ -225,7 +225,7 @@ function handleBookmarkDelete(articleId) {
   showUndoNotification('Bookmark deleted', () => {
     if (lastRemovedBookmark) {
       createBookmark(lastRemovedBookmark.article);
-      showToast('✅ Bookmark restored!');
+      showToast('Bookmark restored!');
       if (currentView === 'bookmarks') {
         showBookmarks(); // Refresh bookmarks view
       }
@@ -288,7 +288,7 @@ const handleViewBookmarks = () => currentView === 'bookmarks' ? showNews() : sho
 // Initialize the application
 export async function init() {
   try {
-    console.log('🚀 Initializing Samachar app...');
+    console.log('Initializing Samachar app...');
     
     // Initialize DOM elements
     initializeElements();
