@@ -830,7 +830,7 @@ body {
     padding: 0.65rem var(--spacing-md);
   }
   .category-nav {
-    top: 120px;
+    top: 112px;
   }
   .articles-grid {
     grid-template-columns: 1fr;
